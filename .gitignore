@@ -1,0 +1,46 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+go-api-bin
+
+# Test binary
+*.test
+
+# Coverage
+*.out
+
+# Dependencies
+vendor/
+
+# Go workspace
+go.work
+go.work.sum
+
+# SQLite
+*.db
+*.db-shm
+*.db-wal
+
+# Environment
+.env
+.env.local
+
+# VS Code
+.vscode/
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+terraform.tfvars
+
+# AWS
+*.zip
+
+# OS
+.DS_Store
+Thumbs.db
+
