@@ -35,7 +35,7 @@ jobs:
       - name: Build Lambda
         working-directory: ./go-api
         run: |
-          GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o bootstrap .
+          GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o bootstrap ./cmd/lambda
 
       - name: Create ZIP
         working-directory: ./go-api
