@@ -27,6 +27,23 @@ func init() {
 
 	r := gin.Default()
 
+	// 🚨 CORS FIX GLOBAL (IMPORTANTE PARA LAMBDA + API GATEWAY)
+	r.Use(func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type,Authorization")
+
+		// 🔥 PRE-FLIGHT REQUEST (CRÍTICO)
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(200)
+			return
+		}
+
+		c.Next()
+	})
+
+	// ── ROUTES ─────────────────────────────────────
+
 	r.POST("/register", userHandler.Register)
 	r.POST("/login", userHandler.Login)
 
@@ -42,13 +59,6 @@ func init() {
 	ginLambda = ginadapter.NewV2(r)
 }
 
-func getEnv(key, fallback string) string {
-	if val := os.Getenv(key); val != "" {
-		return val
-	}
-	return fallback
-}
-
 func main() {
 	lambda.Start(func(
 		ctx context.Context,
@@ -57,4 +67,11 @@ func main() {
 
 		return ginLambda.ProxyWithContext(ctx, req)
 	})
+}
+
+func getEnv(key, fallback string) string {
+	if val := os.Getenv(key); val != "" {
+		return val
+	}
+	return fallback
 }
