@@ -27,7 +27,7 @@ jobs:
 
       - name: Build Web
         working-directory: flutter_app
-        run: flutter build web --release
+        run: flutter build web --release --base-href "/gestor-usuarios-serverless/"
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
