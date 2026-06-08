@@ -75,6 +75,12 @@ resource "aws_apigatewayv2_api" "api_gateway" {
   name          = "${var.project_name}-gateway"
 
   protocol_type = "HTTP"
+
+  cors_configuration {
+  allow_origins = ["*"]
+  allow_methods = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+  allow_headers = ["*"]
+}
 }
 
 resource "aws_apigatewayv2_integration" "lambda" {

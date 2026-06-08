@@ -16,9 +16,9 @@ class ApiException implements Exception {
 class ApiService {
   static String get _baseUrl {
     if (kIsWeb) {
-      return 'http://localhost:8080';
+      return 'https://mgfvk88j53.execute-api.us-east-1.amazonaws.com';
     }
-    return 'http://localhost:8080';
+    return 'https://mgfvk88j53.execute-api.us-east-1.amazonaws.com';
   }
 
   static const String _tokenKey = 'jwt_token';
