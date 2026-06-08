@@ -60,6 +60,7 @@ resource "aws_lambda_function" "api" {
 
   environment {
     variables = {
+      DATABASE_URL = "postgresql://postgres.rvftlzsadhwsmuoeogqv:tUnRonXIeR0brszf@aws-1-us-east-2.pooler.supabase.com:5432/postgres?sslmode=require"
       JWT_SECRET = "MiSuperSecretoJWT"
     }
   }
