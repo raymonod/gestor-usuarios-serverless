@@ -9,14 +9,17 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: terraform
-
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: hashicorp/setup-terraform@v3
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -28,32 +31,40 @@ jobs:
       - name: Verify AWS Identity
         run: aws sts get-caller-identity
 
-      - name: Terraform Init
-        run: terraform init
-
+      # BUILD LAMBDA
       - name: Build Lambda
+        working-directory: ./go-api
         run: |
-          cd go-api
-          GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o bootstrap ./cmd/lambda
+          GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o bootstrap .
 
       - name: Create ZIP
+        working-directory: ./go-api
         run: |
-          cd go-api
-          zip lambda.zip bootstrap
+          zip -r lambda.zip bootstrap
 
-      - name: Copy ZIP
+      - name: Copy ZIP to Terraform
         run: |
           cp go-api/lambda.zip terraform/lambda.zip
 
+      # TERRAFORM
+      - name: Terraform Init
+        working-directory: ./terraform
+        run: terraform init
+
       - name: Terraform Validate
+        working-directory: ./terraform
         run: terraform validate
 
       - name: Terraform Plan
-        run: terraform plan
+        working-directory: ./terraform
+        run: |
+          terraform plan \
+          -var="aws_region=${{ secrets.AWS_REGION }}" \
+          -var="project_name=gestor-usuarios"
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+        working-directory: ./terraform
+        run: |
+          terraform apply -auto-approve \
+          -var="aws_region=${{ secrets.AWS_REGION }}" \
+          -var="project_name=gestor-usuarios"
