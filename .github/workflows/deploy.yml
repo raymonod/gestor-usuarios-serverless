@@ -31,9 +31,19 @@ jobs:
       - name: Terraform Init
         run: terraform init
 
-      - name: Create Lambda Zip
+      - name: Build Lambda
         run: |
-          touch lambda.zip
+          cd go-api
+          GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o bootstrap ./cmd/lambda
+
+      - name: Create ZIP
+        run: |
+          cd go-api
+          zip lambda.zip bootstrap
+
+      - name: Copy ZIP
+        run: |
+          cp go-api/lambda.zip terraform/lambda.zip
 
       - name: Terraform Validate
         run: terraform validate
