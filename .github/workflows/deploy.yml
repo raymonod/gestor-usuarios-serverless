@@ -18,6 +18,10 @@ jobs:
 
       - uses: hashicorp/setup-terraform@v3
 
+      - name: Verify AWS Identity
+        run: |
+          aws sts get-caller-identity
+
       - name: Terraform Init
         run: terraform init
 
@@ -29,7 +33,7 @@ jobs:
         run: terraform validate
 
       - name: Terraform Plan
-        run: terraform plan -var="aws_region=${{ secrets.AWS_REGION }}" -var="project_name=gestor-usuarios"
+        run: terraform plan
 
       - name: Terraform Apply
         run: terraform apply -auto-approve
