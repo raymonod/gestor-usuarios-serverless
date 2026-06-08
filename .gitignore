@@ -35,7 +35,6 @@ go.work.sum
 .terraform/
 *.tfstate
 *.tfstate.*
-terraform.tfvars
 
 # AWS
 *.zip
