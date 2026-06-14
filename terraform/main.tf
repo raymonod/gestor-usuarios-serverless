@@ -158,6 +158,12 @@ resource "aws_lambda_function" "notification_lambda" {
   timeout = 30
 
   memory_size = 256
+
+  environment {
+    variables = {
+      SES_FROM_EMAIL = "raymond.bautista0208@gmail.com"
+    }
+  }
 }
 
 ####################################
@@ -261,3 +267,5 @@ resource "aws_iam_role_policy_attachment" "lambda_sns_access" {
 
   policy_arn = "arn:aws:iam::aws:policy/AmazonSNSFullAccess"
 }
+
+
