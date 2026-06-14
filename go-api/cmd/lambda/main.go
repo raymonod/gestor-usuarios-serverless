@@ -46,6 +46,7 @@ func init() {
 
 	r.POST("/register", userHandler.Register)
 	r.POST("/login", userHandler.Login)
+	r.POST("/notifications/send", userHandler.SendNotification)
 
 	protected := r.Group("/")
 	protected.Use(middleware.AuthMiddleware())
@@ -55,7 +56,6 @@ func init() {
 		protected.PUT("/users/:id", userHandler.UpdateUser)
 		protected.DELETE("/users/:id", userHandler.DeleteUser)
 
-		protected.POST("/notifications/send", userHandler.SendNotification)
 	}
 
 	ginLambda = ginadapter.NewV2(r)
