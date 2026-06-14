@@ -67,6 +67,7 @@ resource "aws_lambda_function" "api" {
     variables = {
       DATABASE_URL = "postgresql://postgres.rvftlzsadhwsmuoeogqv:tUnRonXIeR0brszf@aws-1-us-east-2.pooler.supabase.com:5432/postgres?sslmode=require"
       JWT_SECRET = "MiSuperSecretoJWT"
+      SNS_TOPIC_ARN = aws_sns_topic.notifications.arn
     }
   }
 }
@@ -228,4 +229,11 @@ resource "aws_sqs_queue_policy" "allow_sns" {
       }
     ]
   })
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_sns_access" {
+
+  role = aws_iam_role.lambda_role.name
+
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSNSFullAccess"
 }

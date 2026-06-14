@@ -1,8 +1,14 @@
 package handlers
 
 import (
+	"context"
 	"net/http"
+	"os"
 	"strconv"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/sns"
 
 	"go-api/internal/domain"
 	"go-api/internal/ports"
@@ -241,9 +247,35 @@ func (h *UserHandler) SendNotification(c *gin.Context) {
 		return
 	}
 
+	cfg, err := config.LoadDefaultConfig(context.TODO())
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	client := sns.NewFromConfig(cfg)
+
+	message := req.Email + " | " + req.Subject + " | " + req.Message
+
+	_, err = client.Publish(
+		context.TODO(),
+		&sns.PublishInput{
+			TopicArn: aws.String(os.Getenv("SNS_TOPIC_ARN")),
+			Message:  aws.String(message),
+		},
+	)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"message": "notification sent",
-		"email":   req.Email,
-		"subject": req.Subject,
+		"message": "notification published to SNS",
 	})
 }
