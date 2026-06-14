@@ -231,6 +231,30 @@ resource "aws_sqs_queue_policy" "allow_sns" {
   })
 }
 
+resource "aws_iam_role_policy" "ses_policy" {
+
+  name = "ses-send-email"
+
+  role = aws_iam_role.lambda_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+
+    Statement = [
+      {
+        Effect = "Allow"
+
+        Action = [
+          "ses:SendEmail",
+          "ses:SendRawEmail"
+        ]
+
+        Resource = "*"
+      }
+    ]
+  })
+}
+
 resource "aws_iam_role_policy_attachment" "lambda_sns_access" {
 
   role = aws_iam_role.lambda_role.name
