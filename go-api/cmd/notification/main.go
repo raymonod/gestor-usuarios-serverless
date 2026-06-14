@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"log"
+	"strings"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -33,11 +34,26 @@ func handler(ctx context.Context, event events.SQSEvent) error {
 
 		log.Printf("Mensaje recibido: %s", record.Body)
 
-		var notification Notification
+		var snsMessage struct {
+			Message string `json:"Message"`
+		}
 
-		if err := json.Unmarshal([]byte(record.Body), &notification); err != nil {
-			log.Printf("Error parseando mensaje: %v", err)
+		if err := json.Unmarshal([]byte(record.Body), &snsMessage); err != nil {
+			log.Printf("Error parseando SNS: %v", err)
 			continue
+		}
+
+		parts := strings.Split(snsMessage.Message, "|")
+
+		if len(parts) < 3 {
+			log.Printf("Formato inválido: %s", snsMessage.Message)
+			continue
+		}
+
+		notification := Notification{
+			Email:   strings.TrimSpace(parts[0]),
+			Subject: strings.TrimSpace(parts[1]),
+			Message: strings.TrimSpace(parts[2]),
 		}
 
 		_, err := sesClient.SendEmail(ctx, &ses.SendEmailInput{
