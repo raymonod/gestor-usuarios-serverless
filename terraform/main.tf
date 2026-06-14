@@ -130,3 +130,97 @@ resource "aws_lambda_permission" "api_gateway" {
 
   source_arn = "${aws_apigatewayv2_api.api_gateway.execution_arn}/*/*"
 }
+
+####################################
+# NOTIFICATION LAMBDA
+####################################
+
+resource "aws_lambda_function" "notification_lambda" {
+
+  function_name = "notification-lambda"
+
+  filename = "notification.zip"
+
+  source_code_hash = filebase64sha256("notification.zip")
+
+  role = aws_iam_role.lambda_role.arn
+
+  handler = "bootstrap"
+
+  runtime = "provided.al2"
+
+  timeout = 30
+
+  memory_size = 256
+}
+
+####################################
+# SQS -> NOTIFICATION LAMBDA
+####################################
+
+resource "aws_lambda_event_source_mapping" "notification_trigger" {
+
+  event_source_arn = aws_sqs_queue.notifications.arn
+
+  function_name = aws_lambda_function.notification_lambda.arn
+
+  batch_size = 1
+}
+
+
+####################################
+# SNS
+####################################
+
+resource "aws_sns_topic" "notifications" {
+  name = "user-notifications-topic"
+}
+
+####################################
+# SQS
+####################################
+
+resource "aws_sqs_queue" "notifications" {
+  name = "notification-queue"
+}
+
+####################################
+# SNS -> SQS
+####################################
+
+resource "aws_sns_topic_subscription" "sqs_subscription" {
+  topic_arn = aws_sns_topic.notifications.arn
+  protocol  = "sqs"
+  endpoint  = aws_sqs_queue.notifications.arn
+}
+
+####################################
+# PERMISO SNS -> SQS
+####################################
+
+resource "aws_sqs_queue_policy" "allow_sns" {
+
+  queue_url = aws_sqs_queue.notifications.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+
+    Statement = [
+      {
+        Effect = "Allow"
+
+        Principal = "*"
+
+        Action = "sqs:SendMessage"
+
+        Resource = aws_sqs_queue.notifications.arn
+
+        Condition = {
+          ArnEquals = {
+            "aws:SourceArn" = aws_sns_topic.notifications.arn
+          }
+        }
+      }
+    ]
+  })
+}

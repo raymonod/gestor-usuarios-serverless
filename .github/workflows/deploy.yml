@@ -31,20 +31,35 @@ jobs:
       - name: Verify AWS Identity
         run: aws sts get-caller-identity
 
-      # BUILD LAMBDA
-      - name: Build Lambda
+      # BUILD API LAMBDA
+      - name: Build API Lambda
         working-directory: ./go-api
         run: |
           GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o bootstrap ./cmd/lambda
 
-      - name: Create ZIP
+      - name: Create API ZIP
         working-directory: ./go-api
         run: |
           zip -r lambda.zip bootstrap
 
-      - name: Copy ZIP to Terraform
+      # BUILD NOTIFICATION LAMBDA
+      - name: Build Notification Lambda
+        working-directory: ./go-api
+        run: |
+          GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o notification-bootstrap ./cmd/notification
+
+      - name: Create Notification ZIP
+        working-directory: ./go-api
+        run: |
+          cp notification-bootstrap bootstrap
+          zip -r notification.zip bootstrap
+          rm bootstrap
+
+      # COPY TO TERRAFORM
+      - name: Copy ZIPs to Terraform
         run: |
           cp go-api/lambda.zip terraform/lambda.zip
+          cp go-api/notification.zip terraform/notification.zip
 
       # TERRAFORM
       - name: Terraform Init

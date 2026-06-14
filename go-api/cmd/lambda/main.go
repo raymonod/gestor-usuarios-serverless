@@ -54,6 +54,8 @@ func init() {
 		protected.GET("/users/:id", userHandler.GetUserByID)
 		protected.PUT("/users/:id", userHandler.UpdateUser)
 		protected.DELETE("/users/:id", userHandler.DeleteUser)
+
+		protected.POST("/notifications/send", userHandler.SendNotification)
 	}
 
 	ginLambda = ginadapter.NewV2(r)

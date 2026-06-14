@@ -223,3 +223,27 @@ func parseID(c *gin.Context) (uint, error) {
 	}
 	return uint(id), nil
 }
+
+type NotificationRequest struct {
+	Email   string `json:"email"`
+	Subject string `json:"subject"`
+	Message string `json:"message"`
+}
+
+func (h *UserHandler) SendNotification(c *gin.Context) {
+
+	var req NotificationRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "notification sent",
+		"email":   req.Email,
+		"subject": req.Subject,
+	})
+}
