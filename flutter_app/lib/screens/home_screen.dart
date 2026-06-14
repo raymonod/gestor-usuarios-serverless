@@ -3,6 +3,7 @@ import '../services/api_service.dart';
 import '../models/user.dart';
 import 'login_screen.dart';
 import 'users_screen.dart';
+import 'notification_screen.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -205,6 +206,21 @@ Future<void> _loadProfile() async {
             ),
             const SizedBox(height: 12),
 
+            _ActionTile(
+              icon: Icons.email_outlined,
+              title: 'Enviar Notificación',
+              subtitle: 'Enviar correo mediante SNS',
+              color: theme.colorScheme.primaryContainer,
+              iconColor: theme.colorScheme.primary,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const NotificationScreen(),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 12),
             // Estado del API
             _ActionTile(
               icon: Icons.api_outlined,

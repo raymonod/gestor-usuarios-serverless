@@ -181,4 +181,27 @@ class ApiService {
 
     _parseResponse(response);
   }
+
+  Future<void> sendNotification({
+    required String email,
+    required String subject,
+    required String message,
+  }) async {
+
+    final response = await http
+        .post(
+          Uri.parse('$_baseUrl/notifications/send'),
+          headers: _jsonHeaders(),
+          body: json.encode({
+            'email': email,
+            'subject': subject,
+            'message': message,
+          }),
+        )
+        .timeout(const Duration(seconds: 15));
+
+    _parseResponse(response);
+  }
 }
+
+
