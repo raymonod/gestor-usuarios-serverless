@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"log"
 	"os"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -66,7 +67,7 @@ func main() {
 		ctx context.Context,
 		req events.APIGatewayV2HTTPRequest,
 	) (events.APIGatewayV2HTTPResponse, error) {
-
+		log.Println("Lambda ejecutada por EventBridge")
 		return ginLambda.ProxyWithContext(ctx, req)
 	})
 }

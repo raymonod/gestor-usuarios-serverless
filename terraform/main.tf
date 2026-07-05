@@ -269,3 +269,78 @@ resource "aws_iam_role_policy_attachment" "lambda_sns_access" {
 }
 
 
+####################################
+# EVENTBRIDGE ROLE
+####################################
+
+resource "aws_iam_role" "scheduler_role" {
+
+  name = "eventbridge-scheduler-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+
+    Statement = [{
+      Effect = "Allow"
+
+      Principal = {
+        Service = "scheduler.amazonaws.com"
+      }
+
+      Action = "sts:AssumeRole"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy" "scheduler_policy" {
+
+  name = "scheduler-lambda-policy"
+
+  role = aws_iam_role.scheduler_role.id
+
+  policy = jsonencode({
+
+    Version = "2012-10-17"
+
+    Statement = [
+
+      {
+        Effect = "Allow"
+
+        Action = [
+          "lambda:InvokeFunction"
+        ]
+
+        Resource = aws_lambda_function.api.arn
+      }
+    ]
+  })
+}
+
+
+####################################
+# EVENTBRIDGE SCHEDULER
+####################################
+
+resource "aws_scheduler_schedule" "invoke_lambda" {
+
+  name = "invoke-api-every-5-min"
+
+  flexible_time_window {
+    mode = "OFF"
+  }
+
+  schedule_expression = "rate(5 minutes)"
+
+  target {
+
+    arn = aws_lambda_function.api.arn
+
+    role_arn = aws_iam_role.scheduler_role.arn
+
+    input = jsonencode({
+      source = "eventbridge"
+    })
+
+  }
+}
